@@ -168,7 +168,7 @@ public class PinActivity extends Activity {
         nB.setContentText(cntx.getText(R.string.pin_notify));
         Intent i = new Intent(cntx, PinActivity.class);
         i.setAction("com.notriddle.budget.LOCK");
-        PendingIntent pI = PendingIntent.getActivity(cntx, 0, i, 0);
+        PendingIntent pI = PendingIntent.getActivity(cntx, 0, i, PendingIntent.FLAG_IMMUTABLE);
         nB.setContentIntent(pI);
         nB.setDeleteIntent(pI);
         nB.setAutoCancel(true);
