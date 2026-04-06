@@ -29,7 +29,7 @@ import java.util.GregorianCalendar;
 public class EnvelopesOpenHelper extends SQLiteOpenHelper {
     static final String DB_NAME = "envelopes.db";
     static final int DB_VERSION = 7;
-    public static final Uri URI = Uri.parse("sqlite://com.notriddle.budget/envelopes");
+    public static final Uri URI = Uri.parse("content://com.notriddle.budget/envelopes");
 
     Context mCntx;
     public EnvelopesOpenHelper(Context cntx) {
