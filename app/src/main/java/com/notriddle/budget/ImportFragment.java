@@ -39,13 +39,23 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
+import java.io.InputStreamReader;
+import java.io.InputStream;
+
 public class ImportFragment extends FileCreatorFragment {
     public static ImportFragment newInstance() {
         return new ImportFragment();
     }
 
+    @Override protected Intent getFileIntent() {
+        Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        i.setType("*/*");
+        return i;
+    }
+
     @Override protected void perform(Uri src) throws Throwable {
-        if (src.toString().endsWith(".db")) {
+        if (src.toString().endsWith(".db") || src.getPath().endsWith(".db")) {
             performOnDB(src);
         } else {
             performOnCSV(src);
@@ -53,7 +63,14 @@ public class ImportFragment extends FileCreatorFragment {
     }
 
     protected void performOnDB(Uri src) throws Throwable {
-        String srcPath = src.getPath();
+        File tempFile = new File(getActivity().getCacheDir(), "import.db");
+        InputStream is = getActivity().getContentResolver().openInputStream(src);
+        FileOutputStream os = new FileOutputStream(tempFile);
+        Util.pump(is, os);
+        is.close();
+        os.close();
+
+        String srcPath = tempFile.getAbsolutePath();
         SQLiteDatabase importDb = SQLiteDatabase.openDatabase(
             srcPath, null, SQLiteDatabase.OPEN_READONLY
         );
@@ -124,17 +141,18 @@ public class ImportFragment extends FileCreatorFragment {
             File destPath = getActivity().getDatabasePath(
                 EnvelopesOpenHelper.DB_NAME
             );
-            FileInputStream srcS = new FileInputStream(srcPath);
+            FileInputStream srcS = new FileInputStream(tempFile);
             FileOutputStream destS = new FileOutputStream(destPath);
             Util.pump(srcS, destS);
         }
+        tempFile.delete();
     }
 
     protected void performOnCSV(Uri dest) throws Throwable {
         HashMap<String, Integer> map = new HashMap<String, Integer>();
         ContentValues envelopeValues = new ContentValues();
         ContentValues logValues = new ContentValues();
-        FileReader f = new FileReader(dest.getPath());
+        InputStreamReader f = new InputStreamReader(getActivity().getContentResolver().openInputStream(dest));
         CSVReader c = new CSVReader(f);
         SQLiteDatabase db = (new EnvelopesOpenHelper(getActivity()))
                             .getWritableDatabase();

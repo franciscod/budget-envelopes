@@ -31,15 +31,24 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.Toast;
 import com.notriddle.budget.csv.CSVWriter;
-import java.io.FileWriter;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 public class ExportFragment extends FileCreatorFragment {
     public static ExportFragment newInstance() {
         return new ExportFragment();
     }
 
+    @Override protected Intent getFileIntent() {
+        Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        i.setType("text/csv");
+        i.putExtra(Intent.EXTRA_TITLE, "budget.csv");
+        return i;
+    }
+
     @Override protected void perform(Uri dest) throws Throwable {
-        FileWriter f = new FileWriter(dest.getPath());
+        Writer f = new OutputStreamWriter(getActivity().getContentResolver().openOutputStream(dest));
         CSVWriter c = new CSVWriter(f);
         SQLiteDatabase db = (new EnvelopesOpenHelper(getActivity()))
                             .getReadableDatabase();

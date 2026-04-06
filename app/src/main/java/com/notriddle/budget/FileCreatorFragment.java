@@ -39,25 +39,15 @@ import java.io.File;
 public abstract class FileCreatorFragment extends DialogFragment {
     @Override public void onActivityCreated(Bundle state) {
         super.onActivityCreated(state);
-        Uri dest = Uri.fromFile(new File(
-            Environment.getExternalStorageDirectory(),
-            "budget.csv"
-        ));
-        Intent i = new Intent("org.openintents.action.PICK_FILE");
-        i.putExtra("org.openintents.extra.TITLE",
-                   getActivity().getString(getButtonTitle()));
-        i.setData(dest);
-        if (getActivity().getPackageManager()
-                          .queryIntentActivities(i, 0).size() == 0) {
-            act(dest);
-        } else {
-            startActivityForResult(i, 42);
-        }
+        Intent i = getFileIntent();
+        startActivityForResult(i, 42);
     }
+
+    protected abstract Intent getFileIntent();
 
     @Override public void onActivityResult(int req, int res, Intent data) {
         if (req == 42) {
-            if (res == Activity.RESULT_OK) {
+            if (res == Activity.RESULT_OK && data != null) {
                 act(data.getData());
             } else {
                 dismiss();
